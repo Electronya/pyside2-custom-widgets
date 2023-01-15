@@ -4,10 +4,7 @@ omit =
     */site-packages/*
     */distutils/*
     tests/*
-    src/pkgs/messages/*
-    src/mqttClient/*
-    src/ui/assets/resources_auto.py
-    src/ui/windows/appWindow_auto.py
+    src/demoApps/*
 
 [report]
 exclude_lines =
