@@ -31,7 +31,6 @@ class DemoApp(QMainWindow, Ui_DemoApp):
 
     def onPressButton(self, button: QPushButton):
         idx = self.buttonGroup.id(button)
-        print(f"button {idx} pressed")
         self.leds[idx].setChecked(not self.leds[idx].isChecked())
 
 
