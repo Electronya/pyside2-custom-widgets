@@ -119,6 +119,21 @@ class TestWaitingSpinner(TestCase):
             mockedSetAtt.assert_called_once_with(Qt.WA_TranslucentBackground)
             mockedHide.assert_called_once()
 
+    def test_rotate(self) -> None:
+        """
+        The _rotate method must increment the counter, reset when a full
+        circle have been done and update the widget.
+        """
+        for expectedCount in range(1, self.dut._lineCount + 1):
+            if expectedCount >= self.dut._lineCount:
+                expectedCount = 0
+            with patch.object(self.dut, 'update') as mockedUpdate:
+                self.dut._rotate()
+                self.assertEqual(self.dut._counter, expectedCount,
+                                 '_rotate failed to increment and reset the '
+                                 'counter.')
+                mockedUpdate.assert_called_once()
+
     def test_getLineCount(self) -> None:
         """
         The getLineCount method must return the current spinner line count.
@@ -321,3 +336,15 @@ class TestWaitingSpinner(TestCase):
             self.assertEqual(self.dut._revsPerSecond, testRevsPerSecond,
                              'setRevsPerSecond failed to set the spinner '
                              'revolutions per second.')
+
+    def test_isSpinning(self) -> None:
+        """
+        The isSpinning method must return True if the spinner is spinning and
+        False otherwise.
+        """
+        expectedRes = (False, True)
+        for expectedResult in expectedRes:
+            self.dut._isSpinning = expectedResult
+            result = self.dut.isSpinning()
+            self.assertEqual(result, expectedResult, 'isSpinning failed '
+                             'to return the spinning state of the spinner.')

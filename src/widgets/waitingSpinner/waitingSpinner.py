@@ -73,7 +73,7 @@ class WaitingSpinner(QWidget):
         self._lineLength = 10
         self._lineWidth = 2
         self._innerRadius = 10
-        self._currentCounter = 0
+        self._counter = 0
         self._isSpinning = False
 
     def _updateTimer(self) -> None:
@@ -88,7 +88,7 @@ class WaitingSpinner(QWidget):
         Initialize the internal timer.
         """
         self._timer = QTimer(self)
-        self._timer.timeout.connect(self.rotate)
+        self._timer.timeout.connect(self._rotate)
         self._updateTimer()
 
     def _updateSize(self) -> None:
@@ -110,6 +110,15 @@ class WaitingSpinner(QWidget):
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.hide()
 
+    def _rotate(self) -> None:
+        """
+        Rotate the spinner by incrementing the counter.
+        """
+        self._counter += 1
+        if self._counter >= self._lineCount:
+            self._counter = 0
+        self.update()
+
     def getLineCount(self) -> int:
         """
         Get the line count.
@@ -127,7 +136,7 @@ class WaitingSpinner(QWidget):
             lineCount:          The new line count.
         """
         self._lineCount = lineCount
-        self._currentCounter = 0
+        self._counter = 0
         self._updateTimer()
 
     def getLineLength(self) -> int:
@@ -278,14 +287,52 @@ class WaitingSpinner(QWidget):
         self._revsPerSecond = revsPerSecond
         self._updateTimer()
 
+    def isSpinning(self) -> bool:
+        """
+        Check if the spinner is spinning.
+
+        Return
+            True if the spinner is spinning, false otherwise.
+        """
+        return self._isSpinning
+
+    def start(self) -> None:
+        """
+        Start the spinner.
+        """
+        self.updatePosition()
+        self._isSpinning = True
+        self.show()
+
+        if self.parentWidget and self._isParentDisabled:
+            self.parentWidget().setEnabled(False)
+
+        if not self._timer.isActive():
+            self._timer.start()
+            self._counter = 0
+
+    def stop(self) -> None:
+        """
+        Stop the spinner.
+        """
+        self._isSpinning = False
+        self.hide()
+
+        if self.parentWidget() and self._isParentDisabled:
+            self.parentWidget().setEnabled(True)
+
+        if self._timer.isActive():
+            self._timer.stop()
+            self._counter = 0
+
     def paintEvent(self, event: QPaintEvent):
         self.updatePosition()
         painter = QPainter(self)
         painter.fillRect(self.rect(), Qt.transparent)
         painter.setRenderHint(QPainter.Antialiasing, True)
 
-        if self._currentCounter >= self._lineCount:
-            self._currentCounter = 0
+        if self._counter >= self._lineCount:
+            self._counter = 0
 
         painter.setPen(Qt.NoPen)
         for i in range(0, self._lineCount):
@@ -296,7 +343,7 @@ class WaitingSpinner(QWidget):
             painter.rotate(rotateAngle)
             painter.translate(self._innerRadius, 0)
             distance = self.lineCountDistanceFromPrimary(i,
-                                                         self._currentCounter,
+                                                         self._counter,
                                                          self._lineCount)
             color = self.currentLineColor(distance, self._lineCount,
                                           self._trailFadePct,
@@ -308,38 +355,6 @@ class WaitingSpinner(QWidget):
             painter.drawRoundedRect(rect, self._roundness,
                                     self._roundness, Qt.RelativeSize)
             painter.restore()
-
-    def start(self):
-        self.updatePosition()
-        self._isSpinning = True
-        self.show()
-
-        if self.parentWidget and self._isParentDisabled:
-            self.parentWidget().setEnabled(False)
-
-        if not self._timer.isActive():
-            self._timer.start()
-            self._currentCounter = 0
-
-    def stop(self):
-        self._isSpinning = False
-        self.hide()
-
-        if self.parentWidget() and self._isParentDisabled:
-            self.parentWidget().setEnabled(True)
-
-        if self._timer.isActive():
-            self._timer.stop()
-            self._currentCounter = 0
-
-    def isSpinning(self):
-        return self._isSpinning
-
-    def rotate(self):
-        self._currentCounter += 1
-        if self._currentCounter >= self._lineCount:
-            self._currentCounter = 0
-        self.update()
 
     def updatePosition(self):
         if self.parentWidget() and self._isCentered:
