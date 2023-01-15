@@ -1,1 +1,9 @@
+# Dev dependencies
+pytest>=6.2.5
+pytest-cov>=3.0.0
+coverage>=5.4
+rope>=0.18.0
+flake8>=3.9.2
+
+# App dependencies
 PySide2>=5.15.2
