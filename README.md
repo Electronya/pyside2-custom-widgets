@@ -2,7 +2,7 @@
 A PySide2 custom widgets library.
 
 ![test](https://github.com/Electronya/pyside2-custom-widgets/actions/workflows/test.yml/badge.svg)
-[![coverage](https://codecov.io/gh/Electronya/pyside2-custom-widgets/branch/main/graph/badge.svg?token=WEAWM1E3HZ)](https://codecov.io/gh/Electronya/pyside2-custom-widgets)
+[![codecov](https://codecov.io/gh/Electronya/pyside2-custom-widgets/branch/main/graph/badge.svg?token=r1uzdaQ5US)](https://codecov.io/gh/Electronya/pyside2-custom-widgets)
 
 ## Usage
 Simply copy the desired widget folder in your project and import the base class
