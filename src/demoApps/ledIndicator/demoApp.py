@@ -1,28 +1,38 @@
 import os
 import sys
 
-from PySide2.QtWidgets import QApplication, QMainWindow
+from PySide2.QtWidgets import QApplication, QMainWindow, QPushButton
 
 sys.path.append(os.path.abspath('./src'))
 from widgets.ledIndicator import LedIndicator, LedIndicatorColor   # noqa: E402
-from demoApps.ledIndicator.demoAppWindow import Ui_DemoApp         # noqa: E402
+from demoApps.ledIndicator.demoAppUi import Ui_DemoApp             # noqa: E402
 
 
 class DemoApp(QMainWindow, Ui_DemoApp):
     def __init__(self):
         super(self.__class__, self).__init__()
 
-        self.setupUi(self)
+        # LedIndicator creation. Here one of each color is created in a for
+        # loop, but they can be individually created by the following:
+        # self.led = LedIndicator(self, LedIndicatorColor.YEL)
+        self.leds: list[LedIndicator] = []
+        for idx, color in enumerate(LedIndicatorColor):
+            self.leds.append(LedIndicator(self, color))
+            self.leds[idx].setDisabled(True)    # Make the led non clickable.
 
-        # Change the color at will from the LedIndicatorColor Enum
-        self.led = LedIndicator(self, LedIndicatorColor.YEL)
-        self.led.setDisabled(True)  # Make the led non clickable
-        self.horizontalLayout.addWidget(self.led)
+        self.setupUi(self, len(self.leds))
 
-        self.pushButton.clicked.connect(lambda: self.onPressButton())
+        # Adding the leds to the layout.
+        for idx, led in enumerate(self.leds):
+            self.gridLayout.addWidget(led, 1, idx)
 
-    def onPressButton(self):
-        self.led.setChecked(not self.led.isChecked())
+        # Connecting button group clicked signal.
+        self.buttonGroup.buttonClicked.connect(self.onPressButton)
+
+    def onPressButton(self, button: QPushButton):
+        idx = self.buttonGroup.id(button)
+        print(f"button {idx} pressed")
+        self.leds[idx].setChecked(not self.leds[idx].isChecked())
 
 
 if __name__ == "__main__":
