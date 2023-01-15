@@ -4,8 +4,8 @@ import sys
 from PySide2.QtWidgets import QApplication, QMainWindow
 
 sys.path.append(os.path.abspath('./src'))
-from widgets.ledIndicator import LedIndicator, LedIndicatorColor     # noqa: E402 E501
-from demoApps.ledIndicator.demoAppWindow import Ui_DemoApp
+from widgets.ledIndicator import LedIndicator, LedIndicatorColor   # noqa: E402
+from demoApps.ledIndicator.demoAppWindow import Ui_DemoApp         # noqa: E402
 
 
 class DemoApp(QMainWindow, Ui_DemoApp):
