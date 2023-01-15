@@ -57,6 +57,50 @@ class LedIndicator(QAbstractButton):
                                  color.value['offColor2']['g'],
                                  color.value['offColor2']['b'])
 
+    def _drawBorder(self, painter: QPainter, isExternal: bool) -> None:
+        """
+        Draw the indicator borders.
+
+        Params:
+            painter:        The Qt painter.
+            isExternal:     The external/internal border flag.
+        """
+        if isExternal:
+            gradPoint = -500
+            ellipseSize = 500
+        else:
+            gradPoint = 500
+            ellipseSize = 450
+        gradient = QRadialGradient(QPointF(gradPoint, gradPoint), 1500,
+                                   QPointF(gradPoint, gradPoint))
+        gradient.setColorAt(0, QColor(224, 224, 224))
+        gradient.setColorAt(1, QColor(28, 28, 28))
+        painter.setBrush(QBrush(gradient))
+        painter.drawEllipse(QPointF(0, 0), ellipseSize, ellipseSize)
+
+    def _drawLed(self, painter: QPainter) -> None:
+        """
+        Draw the LED.
+
+        Params:
+            painter:        The Qt painter.
+        """
+        if self.isChecked():
+            gradPoint = -500
+            color1 = self._onColor1
+            color2 = self._onColor2
+        else:
+            gradPoint = 500
+            color1 = self._offColor1
+            color2 = self._offColor2
+
+        gradient = QRadialGradient(QPointF(gradPoint, gradPoint), 1500,
+                                   QPointF(gradPoint, gradPoint))
+        gradient.setColorAt(0, color1)
+        gradient.setColorAt(1, color2)
+        painter.setBrush(gradient)
+        painter.drawEllipse(QPointF(0, 0), 400, 400)
+
     def resizeEvent(self, event: QResizeEvent) -> None:
         """
         Resize event handler.
@@ -74,41 +118,13 @@ class LedIndicator(QAbstractButton):
             event:          The Qt paint event.
         """
         realSize = min(self.width(), self.height())
-
         painter = QPainter(self)
-        pen = QPen(Qt.black)
-        pen.setWidth(1)
-
         painter.setRenderHint(QPainter.Antialiasing)
         painter.translate(self.width() / 2, self.height() / 2)
         painter.scale(realSize / self.scaledSize, realSize / self.scaledSize)
-
-        gradient = QRadialGradient(QPointF(-500, -500), 1500,
-                                   QPointF(-500, -500))
-        gradient.setColorAt(0, QColor(224, 224, 224))
-        gradient.setColorAt(1, QColor(28, 28, 28))
+        pen = QPen(Qt.black)
+        pen.setWidth(1)
         painter.setPen(pen)
-        painter.setBrush(QBrush(gradient))
-        painter.drawEllipse(QPointF(0, 0), 500, 500)
-
-        gradient = QRadialGradient(QPointF(500, 500), 1500, QPointF(500, 500))
-        gradient.setColorAt(0, QColor(224, 224, 224))
-        gradient.setColorAt(1, QColor(28, 28, 28))
-        painter.setPen(pen)
-        painter.setBrush(QBrush(gradient))
-        painter.drawEllipse(QPointF(0, 0), 450, 450)
-
-        painter.setPen(pen)
-        if self.isChecked():
-            gradient = QRadialGradient(QPointF(-500, -500), 1500,
-                                       QPointF(-500, -500))
-            gradient.setColorAt(0, self._onColor1)
-            gradient.setColorAt(1, self._onColor2)
-        else:
-            gradient = QRadialGradient(QPointF(500, 500), 1500,
-                                       QPointF(500, 500))
-            gradient.setColorAt(0, self._offColor1)
-            gradient.setColorAt(1, self._offColor2)
-
-        painter.setBrush(gradient)
-        painter.drawEllipse(QPointF(0, 0), 400, 400)
+        self._drawBorder(painter, True)
+        self._drawBorder(painter, False)
+        self._drawLed(painter)
