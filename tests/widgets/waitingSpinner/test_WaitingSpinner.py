@@ -2,6 +2,7 @@ from unittest import TestCase
 from unittest.mock import call, Mock, patch
 
 from PySide2.QtCore import Qt
+from PySide2.QtGui import QColor
 
 import os
 import sys
@@ -187,6 +188,29 @@ class TestWaitingSpinner(TestCase):
                              'line width.')
             mockedUpdateSize.assert_called_once()
 
+    def test_getRoundness(self) -> None:
+        """
+        The getRoundness method must return the current spinner line roundness.
+        """
+        testRoundness = 15
+        self.dut._roundness = testRoundness
+        result = self.dut.getRoundness()
+        self.assertEqual(result, testRoundness, 'getRoundness failed to '
+                         'return the spinner current line roundness.')
+
+    def test_setRoundness(self) -> None:
+        """
+        The setRoundness method must set the current spinner line roundness
+        while limiting its value.
+        """
+        testRoundnesses = (-0.1, 0.0, 37.8, 85.4, 100.0, 100.1)
+        expectedRoundnesses = (0.0, 0.0, 37.8, 85.4, 100.0, 100.0)
+        for idx, testRoundness in enumerate(testRoundnesses):
+            self.dut.setRoundness(testRoundness)
+            self.assertEqual(self.dut._roundness, expectedRoundnesses[idx],
+                             'setRoundness failed to set the spinner '
+                             'line roundness.')
+
     def test_getInnerRadius(self) -> None:
         """
         The getInnerRadius method must return the current spinner inner radius.
@@ -209,3 +233,91 @@ class TestWaitingSpinner(TestCase):
                              'setInnerRadius failed to set the spinner '
                              'inner radius.')
             mockedUpdateSize.assert_called_once()
+
+    def test_getColor(self) -> None:
+        """
+        The getColor method must return the current spinner color.
+        """
+        testColor = QColor(Qt.red)
+        self.dut._color = testColor
+        result = self.dut.getColor()
+        self.assertEqual(result, testColor, 'getColor failed to '
+                         'return the spinner current color.')
+
+    def test_setColor(self) -> None:
+        """
+        The setColor method must set the current spinner color.
+        """
+        testColor = QColor(Qt.green)
+        self.dut.setColor(Qt.green)
+        self.assertEqual(self.dut._color, testColor,
+                         'setColor failed to set the spinner color.')
+
+    def test_getMinTrailOpacity(self) -> None:
+        """
+        The getMinTrailOpacity method must return the current spinner minimum
+        trail opacity.
+        """
+        testOpacity = 2.1
+        self.dut._minTrailOpacity = testOpacity
+        result = self.dut.getMinTrailOpacity()
+        self.assertEqual(result, testOpacity, 'getMinTrailOpacity failed to '
+                         'return the spinner current minimum trail opacity.')
+
+    def test_setMinTrailOpacity(self) -> None:
+        """
+        The setMinTrailOpacity method must set the current spinner minimum
+        trail opacity.
+        """
+        testOpacity = 2.1
+        self.dut.setMinTrailOpacity(testOpacity)
+        self.assertEqual(self.dut._minTrailOpacity, testOpacity,
+                         'setMinTrailOpacity failed to set the spinner '
+                         'minimum opacity.')
+
+    def test_getTrailFadePct(self) -> None:
+        """
+        The getTrailFadePct method must return the current spinner
+        trail fade percentage.
+        """
+        testFadePct = 2.1
+        self.dut._trailFadePct = testFadePct
+        result = self.dut.getTrailFadePct()
+        self.assertEqual(result, testFadePct, 'getTrailFadePct failed to '
+                         'return the spinner current trail fade percentage.')
+
+    def test_setTrailFadePct(self) -> None:
+        """
+        The setTrailFadePct method must set the current spinner
+        trail fade percentage.
+        """
+        testFadePct = 2.1
+        self.dut.setTrailFadePct(testFadePct)
+        self.assertEqual(self.dut._trailFadePct, testFadePct,
+                         'setTrailFadePct failed to set the spinner '
+                         'trail fade percentage.')
+
+    def test_getRevsPerSecond(self) -> None:
+        """
+        The getRevsPerSecond method must return the current spinner
+        revolutions per second.
+        """
+        testRevsPerSecond = 2.1
+        self.dut._revsPerSecond = testRevsPerSecond
+        result = self.dut.getRevsPerSecond()
+        self.assertEqual(result, testRevsPerSecond, 'getRevsPerSecond failed '
+                         'to return the spinner current revolutions per '
+                         'second.')
+
+    def test_setRevsPerSecond(self) -> None:
+        """
+        The setRevsPerSecond method must set the current spinner
+        revolutions per second.
+        """
+        testRevsPerSecond = 2.1
+        with patch.object(self.dut, '_updateTimer') as mockedUpdateTmr:
+            self.dut.setRevsPerSecond(testRevsPerSecond)
+            mockedUpdateTmr.assert_called_once()
+            self.assertEqual(self.dut._revsPerSecond, testRevsPerSecond,
+                             'setRevsPerSecond failed to set the spinner '
+                             'revolutions per second.')

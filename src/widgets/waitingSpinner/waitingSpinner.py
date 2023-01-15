@@ -168,6 +168,24 @@ class WaitingSpinner(QWidget):
         self._lineWidth = width
         self._updateSize()
 
+    def getRoundness(self) -> float:
+        """
+        Get the line roundness.
+
+        Return
+            The spinner line roundness.
+        """
+        return self._roundness
+
+    def setRoundness(self, roundness: float) -> None:
+        """
+        Set the line roundness.
+
+        Params:
+            roundness:          The new line roundness.
+        """
+        self._roundness = max(0.0, min(100.0, roundness))
+
     def getInnerRadius(self) -> int:
         """
         Get the inner radius.
@@ -178,8 +196,87 @@ class WaitingSpinner(QWidget):
         return self._innerRadius
 
     def setInnerRadius(self, radius: int) -> None:
+        """
+        Set inner radius.
+
+        Params:
+            radius:             The new inner radius.
+        """
         self._innerRadius = radius
         self._updateSize()
+
+    def getColor(self) -> QColor:
+        """
+        Get the color.
+
+        Return
+            The spinner color.
+        """
+        return self._color
+
+    def setColor(self, color: Qt.GlobalColor = Qt.black) -> None:
+        """
+        Set the color.
+
+        Params:
+            color:              The new color.
+        """
+        self._color = QColor(color)
+
+    def getMinTrailOpacity(self) -> float:
+        """
+        Get the minimum trail opacity.
+
+        Return
+            The spinner minimum trail opacity.
+        """
+        return self._minTrailOpacity
+
+    def setMinTrailOpacity(self, minTrailOpacity: float) -> None:
+        """
+        Set the minimum trail opacity.
+
+        Params:
+            minTrailOpacity:    The new minimum trail opacity.
+        """
+        self._minTrailOpacity = minTrailOpacity
+
+    def getTrailFadePct(self) -> float:
+        """
+        Get the trail fade percentage.
+
+        Return
+            The spinner trail fade percentage.
+        """
+        return self._trailFadePct
+
+    def setTrailFadePct(self, fadePct: float) -> None:
+        """
+        Set the trail fade percentage.
+
+        Params:
+            fadePct:            The new trail fade percentage.
+        """
+        self._trailFadePct = fadePct
+
+    def getRevsPerSecond(self) -> float:
+        """
+        Get the revolutions per second.
+
+        Return
+            The spinner revolutions per second.
+        """
+        return self._revsPerSecond
+
+    def setRevsPerSecond(self, revsPerSecond: float) -> None:
+        """
+        Set the revolutions per second.
+
+        Params:
+            revsPerSecond:      The new revolutions per second.
+        """
+        self._revsPerSecond = revsPerSecond
+        self._updateTimer()
 
     def paintEvent(self, event: QPaintEvent):
         self.updatePosition()
@@ -235,39 +332,8 @@ class WaitingSpinner(QWidget):
             self._timer.stop()
             self._currentCounter = 0
 
-    def color(self):
-        return self._color
-
-    def roundness(self):
-        return self._roundness
-
-    def minimumTrailOpacity(self):
-        return self._minTrailOpacity
-
-    def trailFadePercentage(self):
-        return self._trailFadePct
-
-    def revolutionsPerSecond(self):
-        return self._revsPerSecond
-
     def isSpinning(self):
         return self._isSpinning
-
-    def setRoundness(self, roundness):
-        self._roundness = max(0.0, min(100.0, roundness))
-
-    def setColor(self, color=Qt.black):
-        self._color = QColor(color)
-
-    def setRevolutionsPerSecond(self, revolutionsPerSecond):
-        self._revsPerSecond = revolutionsPerSecond
-        self.updateTimer()
-
-    def setTrailFadePercentage(self, trail):
-        self._trailFadePct = trail
-
-    def setMinimumTrailOpacity(self, minimumTrailOpacity):
-        self._minTrailOpacity = minimumTrailOpacity
 
     def rotate(self):
         self._currentCounter += 1
