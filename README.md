@@ -30,3 +30,6 @@ pytest
 ### 1. LedIndicator
 - A simple led indicator widget. Base on the [nlamprian](https://github.com/nlamprian) PyQt5 [project](https://github.com/nlamprian/pyqt5-led-indicator-widget).
 - [Demo App](src/demoApps/ledIndicator/demoApp.py)
+### 2. WaitingSpinner
+- A simple and customizable waiting spinner. Closely (mostly to match Electronya coding standard and adding unit test cases) base on [z3ntu](https://github.com/z3ntu) [QWaitingSpinner](https://github.com/z3ntu/QtWaitingSpinner). Which is in turn is a port of [snowwlex](https://github.com/snowwlex) C++ [project](https://github.com/snowwlex/QtWaitingSpinner).
+- [DemoApp]()
