@@ -127,6 +127,50 @@ class WaitingSpinner(QWidget):
             self.move(int(self.parentWidget().width() / 2 - self.width() / 2),
                       int(self.parentWidget().height() / 2 - self.height() / 2))    # noqa: E501
 
+    def _calcLineTrailPos(self, lineIdx: int, activeIdx: int,
+                          lineCount: int) -> int:
+        """
+        Calculate the position of the given line in the trail.
+
+        Params:
+            lineIdx:            The current line index in the spinner.
+            activeIdx:          The index in the spinner of the active line.
+            lineCount:          The total line count in the spinner.
+        """
+        trailPos = activeIdx - lineIdx
+        if trailPos < 0:
+            trailPos += lineCount
+        return trailPos
+
+    def _getLineColor(self, trailPos: int, lineCount: int,
+                      trailFadePct: float, minOpacity: float,
+                      baseColor: QColor) -> QColor:
+        """
+        Get the current line color.
+
+        Params:
+            trailPos:           The current line trail position.
+            lineCount:          The total line count in the spinner.
+            trailFadePct:       The trail fade percentage.
+            minOpacity:         The minimum opacity.
+            baseColor:          The spinner base color.
+        """
+        color = QColor(baseColor)
+        if trailPos == 0:
+            return color
+        minAlphaF = minOpacity / 100.0
+        distanceThreshold = int(math.ceil((lineCount - 1) * trailFadePct / 100.0))    # noqa: E501
+        if trailPos > distanceThreshold:
+            color.setAlphaF(minAlphaF)
+        else:
+            alphaDiff = color.alphaF() - minAlphaF
+            gradient = alphaDiff / float(distanceThreshold + 1)
+            resultAlpha = color.alphaF() - gradient * trailPos
+            # If alpha is out of bounds, clip it.
+            resultAlpha = min(1.0, max(0.0, resultAlpha))
+            color.setAlphaF(resultAlpha)
+        return color
+
     def getLineCount(self) -> int:
         """
         Get the line count.
@@ -350,10 +394,10 @@ class WaitingSpinner(QWidget):
             rotateAngle = float(360 * i) / float(self._lineCount)
             painter.rotate(rotateAngle)
             painter.translate(self._innerRadius, 0)
-            distance = self.lineCountDistanceFromPrimary(i,
+            distance = self._calcLineTrailPos(i,
                                                          self._counter,
                                                          self._lineCount)
-            color = self.currentLineColor(distance, self._lineCount,
+            color = self._getLineColor(distance, self._lineCount,
                                           self._trailFadePct,
                                           self._minTrailOpacity,
                                           self._color)
@@ -363,27 +407,3 @@ class WaitingSpinner(QWidget):
             painter.drawRoundedRect(rect, self._roundness,
                                     self._roundness, Qt.RelativeSize)
             painter.restore()
-
-    def lineCountDistanceFromPrimary(self, current, primary, totalNrOfLines):
-        distance = primary - current
-        if distance < 0:
-            distance += totalNrOfLines
-        return distance
-
-    def currentLineColor(self, countDistance, totalNrOfLines,
-                         trailFadePerc, minOpacity, colorinput):
-        color = QColor(colorinput)
-        if countDistance == 0:
-            return color
-        minAlphaF = minOpacity / 100.0
-        distanceThreshold = int(math.ceil((totalNrOfLines - 1) * trailFadePerc / 100.0))    # noqa: E501
-        if countDistance > distanceThreshold:
-            color.setAlphaF(minAlphaF)
-        else:
-            alphaDiff = color.alphaF() - minAlphaF
-            gradient = alphaDiff / float(distanceThreshold + 1)
-            resultAlpha = color.alphaF() - gradient * countDistance
-            # If alpha is out of bounds, clip it.
-            resultAlpha = min(1.0, max(0.0, resultAlpha))
-            color.setAlphaF(resultAlpha)
-        return color

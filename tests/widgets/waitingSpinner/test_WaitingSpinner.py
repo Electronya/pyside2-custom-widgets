@@ -161,6 +161,28 @@ class TestWaitingSpinner(TestCase):
             mockedParentWidget().height.assert_called_once()
             mockedMove.assert_called_once_with(expectedX, expectedY)
 
+    def test_calcLineTrailPos(self) -> None:
+        """
+        The _calcLineTrailPos must calculate the current line position in the
+        trail.
+        """
+        currentLines = (0, 2, 7, 10)
+        activeLines = (5, 6, 10, 9)
+        lineCounts = (10, 20, 15, 30)
+        expectedPositions = (5, 4, 3, 29)
+        for idx, line in enumerate(currentLines):
+            result = self.dut._calcLineTrailPos(line, activeLines[idx],
+                                                lineCounts[idx])
+            self.assertEqual(result, expectedPositions[idx],
+                             '_calcLineTrailPos failed to calculate the '
+                             'current line position in the trail.')
+
+    def test_getLineColor(self) -> None:
+        """
+        The _getLineColor method must determine the current line alpha value
+        and return the corresponding color.
+        """
+
     def test_getLineCount(self) -> None:
         """
         The getLineCount method must return the current spinner line count.
