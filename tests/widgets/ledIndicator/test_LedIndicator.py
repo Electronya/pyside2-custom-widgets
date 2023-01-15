@@ -68,10 +68,10 @@ class TestLedIndicator(TestCase):
                            'onColor2': QColor(192, 0, 0),
                            'offColor1': QColor(28, 0, 0),
                            'offColor2': QColor(128, 0, 0)},
-                          {'onColor1': QColor(0, 255, 255),
-                           'onColor2': QColor(0, 192, 192),
-                           'offColor1': QColor(0, 28, 28),
-                           'offColor2': QColor(0, 128, 128)})
+                          {'onColor1': QColor(255, 255, 0),
+                           'onColor2': QColor(192, 192, 0),
+                           'offColor1': QColor(28, 28, 0),
+                           'offColor2': QColor(128, 128, 0)})
         for idx, testColor in enumerate(testColors):
             with patch(f"{self.baseCls}.__init__"), \
                     patch(f"{self.baseCls}.setMinimumSize"), \

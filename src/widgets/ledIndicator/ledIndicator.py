@@ -22,10 +22,10 @@ class LedIndicatorColor(dict, Enum):
            'onColor2': {'r': 0, 'g': 0, 'b': 192},
            'offColor1': {'r': 0, 'g': 0, 'b': 28},
            'offColor2': {'r': 0, 'g': 0, 'b': 128}}
-    YEL = {'onColor1': {'r': 0, 'g': 255, 'b': 255},
-           'onColor2': {'r': 0, 'g': 192, 'b': 192},
-           'offColor1': {'r': 0, 'g': 28, 'b': 28},
-           'offColor2': {'r': 0, 'g': 128, 'b': 128}}
+    YEL = {'onColor1': {'r': 255, 'g': 255, 'b': 0},
+           'onColor2': {'r': 192, 'g': 192, 'b': 0},
+           'offColor1': {'r': 28, 'g': 28, 'b': 0},
+           'offColor2': {'r': 128, 'g': 128, 'b': 0}}
 
 
 class LedIndicator(QAbstractButton):
