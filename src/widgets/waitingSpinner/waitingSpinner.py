@@ -119,6 +119,14 @@ class WaitingSpinner(QWidget):
             self._counter = 0
         self.update()
 
+    def _centerInParent(self) -> None:
+        """
+        Center in parent if the feature is enabled.
+        """
+        if self.parentWidget() and self._isCentered:
+            self.move(int(self.parentWidget().width() / 2 - self.width() / 2),
+                      int(self.parentWidget().height() / 2 - self.height() / 2))    # noqa: E501
+
     def getLineCount(self) -> int:
         """
         Get the line count.
@@ -300,7 +308,7 @@ class WaitingSpinner(QWidget):
         """
         Start the spinner.
         """
-        self.updatePosition()
+        self._centerInParent()
         self._isSpinning = True
         self.show()
 
@@ -326,7 +334,7 @@ class WaitingSpinner(QWidget):
             self._counter = 0
 
     def paintEvent(self, event: QPaintEvent):
-        self.updatePosition()
+        self._centerInParent()
         painter = QPainter(self)
         painter.fillRect(self.rect(), Qt.transparent)
         painter.setRenderHint(QPainter.Antialiasing, True)
@@ -355,11 +363,6 @@ class WaitingSpinner(QWidget):
             painter.drawRoundedRect(rect, self._roundness,
                                     self._roundness, Qt.RelativeSize)
             painter.restore()
-
-    def updatePosition(self):
-        if self.parentWidget() and self._isCentered:
-            self.move(int(self.parentWidget().width() / 2 - self.width() / 2),
-                      int(self.parentWidget().height() / 2 - self.height() / 2))    # noqa: E501
 
     def lineCountDistanceFromPrimary(self, current, primary, totalNrOfLines):
         distance = primary - current

@@ -134,6 +134,33 @@ class TestWaitingSpinner(TestCase):
                                  'counter.')
                 mockedUpdate.assert_called_once()
 
+    def test_centerInParent(self) -> None:
+        """
+        The _centerInParent method must center the spinner if the feature
+        is enabled.
+        """
+        centeredFlags = (False, True)
+        spinnerWidth = 2
+        spinnerHeight = 2
+        parentWidth = 10
+        parentHeight = 10
+        expectedX = int(parentWidth / 2 - spinnerWidth / 2)
+        expectedY = int(parentHeight / 2 - spinnerHeight / 2)
+        with patch.object(self.dut, 'parentWidget') as mockedParentWidget, \
+                patch.object(self.dut, 'width') as mockedWidth, \
+                patch.object(self.dut, 'height') as mockedHeight, \
+                patch.object(self.dut, 'move') as mockedMove:
+            mockedParentWidget().width.return_value = parentWidth
+            mockedParentWidget().height.return_value = parentHeight
+            mockedWidth.return_value = spinnerWidth
+            mockedHeight.return_value = spinnerHeight
+            for centeredFlag in centeredFlags:
+                self.dut._isCentered = centeredFlag
+                self.dut._centerInParent()
+            mockedParentWidget().width.assert_called_once()
+            mockedParentWidget().height.assert_called_once()
+            mockedMove.assert_called_once_with(expectedX, expectedY)
+
     def test_getLineCount(self) -> None:
         """
         The getLineCount method must return the current spinner line count.
