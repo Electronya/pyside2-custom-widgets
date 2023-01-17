@@ -142,34 +142,31 @@ class WaitingSpinner(QWidget):
             trailPos += lineCount
         return trailPos
 
-    def _getLineColor(self, trailPos: int, lineCount: int,
-                      trailFadePct: float, minOpacity: float,
-                      baseColor: QColor) -> QColor:
+    def _calcLineAlpha(self, trailPos: int, lineCount: int, activeAlpha: float,
+                       fadePct: float, minOpacity: float) -> float:
         """
-        Get the current line color.
+        Calculate the line alpha value.
 
         Params:
             trailPos:           The current line trail position.
             lineCount:          The total line count in the spinner.
+            activeAlpha:        The active line alpha.
             trailFadePct:       The trail fade percentage.
             minOpacity:         The minimum opacity.
-            baseColor:          The spinner base color.
+
+        Return
+            The alpha value for the desired line.
         """
-        color = QColor(baseColor)
         if trailPos == 0:
-            return color
-        minAlphaF = minOpacity / 100.0
-        distanceThreshold = int(math.ceil((lineCount - 1) * trailFadePct / 100.0))    # noqa: E501
-        if trailPos > distanceThreshold:
-            color.setAlphaF(minAlphaF)
+            return activeAlpha
+        minAlpha = minOpacity / 100.0
+        posThreshold = math.ceil((lineCount - 1) * fadePct / 100)
+        if trailPos > posThreshold:
+            return minAlpha
         else:
-            alphaDiff = color.alphaF() - minAlphaF
-            gradient = alphaDiff / float(distanceThreshold + 1)
-            resultAlpha = color.alphaF() - gradient * trailPos
-            # If alpha is out of bounds, clip it.
-            resultAlpha = min(1.0, max(0.0, resultAlpha))
-            color.setAlphaF(resultAlpha)
-        return color
+            gradient = (activeAlpha - minAlpha) / (posThreshold + 1)
+            lineAlpha = activeAlpha - gradient * trailPos
+            return min(activeAlpha, max(minAlpha, lineAlpha))
 
     def getLineCount(self) -> int:
         """

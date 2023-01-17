@@ -177,11 +177,18 @@ class TestWaitingSpinner(TestCase):
                              '_calcLineTrailPos failed to calculate the '
                              'current line position in the trail.')
 
-    def test_getLineColor(self) -> None:
+    def test_calcLineAlphaActiveLine(self) -> None:
         """
-        The _getLineColor method must determine the current line alpha value
-        and return the corresponding color.
+        The _calcLineAlpha method must calculate and return the current line
+        alpha value.
         """
+        lines = (0, 3, 5, 8, 10)
+        expectedAlphas = (1.0, 0.677138668, 0.46189778, 0.139036448, 0.031416)
+        for idx, line in enumerate(lines):
+            result = self.dut._calcLineAlpha(line, 10, 1.0, 80, 3.1416)
+            self.assertAlmostEqual(result, expectedAlphas[idx], places=7,
+                                   msg='_calcLineAlpha failed to calculate '
+                                   'the current line alpha.')
 
     def test_getLineCount(self) -> None:
         """
