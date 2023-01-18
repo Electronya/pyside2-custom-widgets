@@ -156,31 +156,58 @@ class WaitingSpinner(QWidget):
             trailPos += lineCount
         return trailPos
 
-    def _calcLineAlpha(self, trailPos: int, lineCount: int, activeAlpha: float,
-                       fadePct: float, minOpacity: float) -> float:
+    def _calcLineAlpha(self, trailPos: int, lineCount: int, fadePct: float,
+                       minOpacity: float) -> float:
         """
         Calculate the line alpha value.
 
         Params:
             trailPos:           The current line trail position.
             lineCount:          The total line count in the spinner.
-            activeAlpha:        The active line alpha.
             trailFadePct:       The trail fade percentage.
             minOpacity:         The minimum opacity.
 
         Return
             The alpha value for the desired line.
         """
+        maxAlpha = 1.0
         if trailPos == 0:
-            return activeAlpha
+            return maxAlpha
         minAlpha = minOpacity / 100.0
         posThreshold = math.ceil((lineCount - 1) * fadePct / 100)
         if trailPos > posThreshold:
             return minAlpha
         else:
-            gradient = (activeAlpha - minAlpha) / (posThreshold + 1)
-            lineAlpha = activeAlpha - gradient * trailPos
-            return min(activeAlpha, max(minAlpha, lineAlpha))
+            gradient = (maxAlpha - minAlpha) / (posThreshold + 1)
+            lineAlpha = maxAlpha - gradient * trailPos
+            return min(maxAlpha, max(minAlpha, lineAlpha))
+
+    def _drawLine(self, painter: QPainter, line: int) -> None:
+        """
+        Draw the requested line.
+
+        Params:
+            painter:            The painter.
+            line:               The line ID to draw.
+        """
+        painter.save()
+        painter.translate(self._innerRadius + self._lineLength,
+                          self._innerRadius + self._lineLength)
+        rotateAngle = 360 * line / self._lineCount
+        painter.rotate(rotateAngle)
+        painter.translate(self._innerRadius, 0)
+        trailPos = self._calcLineTrailPos(line, self._counter, self._lineCount)
+        alpha = self._calcLineAlpha(trailPos, self._lineCount,
+                                    self._trailFadePct,
+                                    self._minTrailOpacity)
+        color = QColor(self._color)
+        color.setAlphaF(alpha)
+        painter.setBrush(color)
+        rect = QRect(0, int(-self._lineWidth / 2), self._lineLength,
+                     self._lineWidth)
+        painter.drawRoundedRect(rect, self._roundness,
+                                self._roundness, Qt.RelativeSize)
+        painter.restore()
 
     def getLineCount(self) -> int:
         """
@@ -382,32 +409,9 @@ class WaitingSpinner(QWidget):
             self.hide()
 
     def paintEvent(self, event: QPaintEvent):
-        self._centerInParent()
         painter = QPainter(self)
         painter.fillRect(self.rect(), Qt.transparent)
         painter.setRenderHint(QPainter.Antialiasing, True)
-
-        if self._counter >= self._lineCount:
-            self._counter = 0
-
         painter.setPen(Qt.NoPen)
-        for i in range(0, self._lineCount):
-            painter.save()
-            painter.translate(self._innerRadius + self._lineLength,
-                              self._innerRadius + self._lineLength)
-            rotateAngle = float(360 * i) / float(self._lineCount)
-            painter.rotate(rotateAngle)
-            painter.translate(self._innerRadius, 0)
-            distance = self._calcLineTrailPos(i,
-                                                         self._counter,
-                                                         self._lineCount)
-            color = self._getLineColor(distance, self._lineCount,
-                                          self._trailFadePct,
-                                          self._minTrailOpacity,
-                                          self._color)
-            painter.setBrush(color)
-            rect = QRect(0, int(-self._lineWidth / 2),
-                         int(self._lineLength), int(self._lineWidth))
-            painter.drawRoundedRect(rect, self._roundness,
-                                    self._roundness, Qt.RelativeSize)
-            painter.restore()
+        for line in range(self._lineCount):
+            self._drawLine(painter, line)

@@ -23,6 +23,8 @@ class TestWaitingSpinner(TestCase):
         self.widgetCls = 'widgets.waitingSpinner.waitingSpinner.QWidget'
         self.timerCls = 'widgets.waitingSpinner.waitingSpinner.QTimer'
         self.painterCls = 'widgets.waitingSpinner.waitingSpinner.QPainter'
+        self.colorCls = 'widgets.waitingSpinner.waitingSpinner.QColor'
+        self.rectCls = 'widgets.waitingSpinner.waitingSpinner.QRect'
         with patch(f"{self.widgetCls}.__init__"), \
                 patch.object(WaitingSpinner, '_initTimer'), \
                 patch.object(WaitingSpinner, '_initDisplayState'):
@@ -212,10 +214,88 @@ class TestWaitingSpinner(TestCase):
         lines = (0, 3, 5, 8, 10)
         expectedAlphas = (1.0, 0.677138668, 0.46189778, 0.139036448, 0.031416)
         for idx, line in enumerate(lines):
-            result = self.dut._calcLineAlpha(line, 10, 1.0, 80, 3.1416)
+            result = self.dut._calcLineAlpha(line, 10, 80, 3.1416)
             self.assertAlmostEqual(result, expectedAlphas[idx], places=7,
                                    msg='_calcLineAlpha failed to calculate '
                                    'the current line alpha.')
+
+    def test_drawLineSavePainter(self) -> None:
+        """
+        The _drawLine method must save, transform, set the brush
+        and restore the painter.
+        """
+        mockedPainter = Mock()
+        mockedColor = Mock()
+        expectedAngles = (0, 18, 36, 54, 72)
+        expectedTransCalls = \
+            (call(self.dut._innerRadius + self.dut._lineLength,
+                  self.dut._innerRadius + self.dut._lineLength),
+             call(self.dut._innerRadius, 0))
+        for line, angle in enumerate(expectedAngles):
+            mockedPainter.reset_mock()
+            with patch(self.colorCls) as mockedColorConst, \
+                    patch.object(self.dut, '_calcLineTrailPos'), \
+                    patch.object(self.dut, '_calcLineAlpha'):
+                mockedColorConst.return_value = mockedColor
+                self.dut._drawLine(mockedPainter, line)
+                mockedPainter.save.assert_called_once()
+                mockedPainter.translate.assert_has_calls(expectedTransCalls)
+                mockedPainter.rotate.assert_called_once_with(angle)
+                mockedPainter.setBrush.assert_called_once_with(mockedColor)
+                mockedPainter.restore.assert_called_once()
+
+    def test_drawLineColor(self) -> None:
+        """
+        The _drawLine method must create the line color based on its position
+        in the trail the fade percentage and the minimal opacity.
+        """
+        mockedPainter = Mock()
+        mockedColor = Mock()
+        trailPositions = (0, 1, 2, 3, 4)
+        alphas = (1.0, 0.8, 0.7, 0.6, 0.5)
+        for line, trailPos in enumerate(trailPositions):
+            mockedColor.reset_mock()
+            with patch(self.colorCls) as mockedColorConst, \
+                    patch.object(self.dut, '_calcLineTrailPos') \
+                    as mockedCalcLineTrailPos, \
+                    patch.object(self.dut, '_calcLineAlpha') \
+                    as mockedCalcLineAlpha:
+                mockedColorConst.return_value = mockedColor
+                mockedCalcLineTrailPos.return_value = trailPos
+                mockedCalcLineAlpha.return_value = alphas[line]
+                self.dut._drawLine(mockedPainter, line)
+                mockedColorConst.assert_called_once_with(self.dut._color)
+                mockedCalcLineTrailPos \
+                    .assert_called_once_with(line, self.dut._counter,
+                                             self.dut._lineCount)
+                mockedCalcLineAlpha \
+                    .assert_called_once_with(trailPos, self.dut._lineCount,
+                                             self.dut._trailFadePct,
+                                             self.dut._minTrailOpacity)
+                mockedColor.setAlphaF.assert_called_once_with(alphas[line])
+
+    def test_drawLineDrawRect(self) -> None:
+        """
+        The _drawLine must draw the line.
+        """
+        mockedPainter = Mock()
+        mockedRect = Mock()
+        for line in range(5):
+            mockedPainter.reset_mock()
+            with patch(self.colorCls), \
+                    patch(self.rectCls) as mockedRectConst, \
+                    patch.object(self.dut, '_calcLineTrailPos'), \
+                    patch.object(self.dut, '_calcLineAlpha'):
+                mockedRectConst.return_value = mockedRect
+                self.dut._drawLine(mockedPainter, line)
+                mockedRectConst \
+                    .assert_called_once_with(0, int(-self.dut._lineWidth / 2),
+                                             self.dut._lineLength,
+                                             self.dut._lineWidth)
+                mockedPainter.drawRoundedRect \
+                    .assert_called_once_with(mockedRect, self.dut._roundness,
+                                             self.dut._roundness,
+                                             Qt.RelativeSize)
 
     def test_getLineCount(self) -> None:
         """
@@ -492,3 +572,30 @@ class TestWaitingSpinner(TestCase):
         """
         The paintEvent must initialize the painter.
         """
+        mockedPainter = Mock()
+        with patch(self.painterCls) as mockedPainterConst, \
+                patch.object(self.dut, 'rect') as mockedRect, \
+                patch.object(self.dut, '_drawLine'):
+            mockedPainterConst.return_value = mockedPainter
+            mockedRect.return_value = 10
+            self.dut.paintEvent(None)
+            mockedPainterConst.assert_called_once_with(self.dut)
+            mockedPainter.fillRect.assert_called_once_with(10, Qt.transparent)
+            mockedPainter.setRenderHint \
+                .assert_called_once_with(mockedPainterConst.Antialiasing, True)
+            mockedPainter.setPen.assert_called_once_with(Qt.NoPen)
+
+    def test_paintEventDrawLines(self) -> None:
+        """
+        The paintEvent must draw all the lines of the spinner.
+        """
+        mockedPainter = Mock()
+        expectedCalls = []
+        for line in range(self.dut._lineCount):
+            expectedCalls.append(call(mockedPainter, line))
+        with patch(self.painterCls) as mockedPainterConst, \
+                patch.object(self.dut, 'rect'), \
+                patch.object(self.dut, '_drawLine') as mockedDrawLine:
+            mockedPainterConst.return_value = mockedPainter
+            self.dut.paintEvent(None)
+            mockedDrawLine.assert_has_calls(expectedCalls)
