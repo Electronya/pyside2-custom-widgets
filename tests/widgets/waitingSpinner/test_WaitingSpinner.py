@@ -22,6 +22,7 @@ class TestWaitingSpinner(TestCase):
         """
         self.widgetCls = 'widgets.waitingSpinner.waitingSpinner.QWidget'
         self.timerCls = 'widgets.waitingSpinner.waitingSpinner.QTimer'
+        self.painterCls = 'widgets.waitingSpinner.waitingSpinner.QPainter'
         with patch(f"{self.widgetCls}.__init__"), \
                 patch.object(WaitingSpinner, '_initTimer'), \
                 patch.object(WaitingSpinner, '_initDisplayState'):
@@ -160,6 +161,32 @@ class TestWaitingSpinner(TestCase):
             mockedParentWidget().width.assert_called_once()
             mockedParentWidget().height.assert_called_once()
             mockedMove.assert_called_once_with(expectedX, expectedY)
+
+    def test_disableParent(self) -> None:
+        """
+        The _disableParent must disable the spinner parent when the feature
+        is enabled
+        """
+        disableFlags = (True, False)
+        with patch.object(self.dut, 'parentWidget') as mockedParentWidget:
+            for disableFlag in disableFlags:
+                mockedParentWidget().return_value = 'test parent'
+                self.dut._isParentDisabled = disableFlag
+                self.dut._disableParent()
+            mockedParentWidget().setEnabled.assert_called_once_with(False)
+
+    def test_enableParent(self) -> None:
+        """
+        The _enableParent must enable the spinner parent when the feature
+        is enabled
+        """
+        enable = (True, False)
+        with patch.object(self.dut, 'parentWidget') as mockedParentWidget:
+            for enableFlag in enable:
+                mockedParentWidget().return_value = 'test parent'
+                self.dut._isParentDisabled = enableFlag
+                self.dut._enableParent()
+            mockedParentWidget().setEnabled.assert_called_once_with(True)
 
     def test_calcLineTrailPos(self) -> None:
         """
@@ -404,3 +431,64 @@ class TestWaitingSpinner(TestCase):
             result = self.dut.isSpinning()
             self.assertEqual(result, expectedResult, 'isSpinning failed '
                              'to return the spinning state of the spinner.')
+
+    def test_startCenterAndDisableParent(self) -> None:
+        """
+        The start method must center in and disable the spinner parent if
+        the spinner is not already spinning.
+        """
+        spinningFlags = (False, True)
+        with patch.object(self.dut, '_centerInParent') as mockedCenter, \
+                patch.object(self.dut, '_disableParent') as MockedDisable, \
+                patch.object(self.dut, 'show'):
+            for spinningFlag in spinningFlags:
+                self.dut._isSpinning = spinningFlag
+                self.dut.start()
+            mockedCenter.assert_called_once()
+            MockedDisable.assert_called_once()
+
+    def test_startStartSpinning(self) -> None:
+        """
+        The start method must start the internal timer, set the spinning flag
+        and show the spinner if it's not already spinning.
+        """
+        spinningFlags = (False, True)
+        with patch.object(self.dut, '_centerInParent'), \
+                patch.object(self.dut, '_disableParent'), \
+                patch.object(self.dut, 'show') as mockedShow:
+            for spinningFlag in spinningFlags:
+                self.dut._isSpinning = spinningFlag
+                self.dut._counter = 10
+                self.dut.start()
+                if not spinningFlag:
+                    self.assertTrue(self.dut._isSpinning, 'start failed to '
+                                    'set the spinning flag')
+                    self.assertEqual(self.dut._counter, 0, 'start failed to '
+                                     'initialize the line counter.')
+            self.dut._timer.start.assert_called_once()
+            mockedShow.assert_called_once()
+
+    def test_stopStopSpinning(self) -> None:
+        """
+        The stop method must stop the internal timer, clear the spinning flag
+        enable the parent and hide the spinner if it's already spinning.
+        """
+        spinningFlags = (False, True)
+        with patch.object(self.dut, '_centerInParent'), \
+                patch.object(self.dut, '_enableParent') as mockedEnable, \
+                patch.object(self.dut, 'hide') as mockedHide:
+            for spinningFlag in spinningFlags:
+                self.dut._isSpinning = spinningFlag
+                self.dut._counter = 10
+                self.dut.stop()
+                if spinningFlag:
+                    self.assertFalse(self.dut._isSpinning, 'stop failed to '
+                                     'set the spinning flag')
+            self.dut._timer.stop.assert_called_once()
+            mockedEnable.assert_called_once()
+            mockedHide.assert_called_once()
+
+    def test_paintEventInitPainter(self) -> None:
+        """
+        The paintEvent must initialize the painter.
+        """

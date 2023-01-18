@@ -127,6 +127,20 @@ class WaitingSpinner(QWidget):
             self.move(int(self.parentWidget().width() / 2 - self.width() / 2),
                       int(self.parentWidget().height() / 2 - self.height() / 2))    # noqa: E501
 
+    def _disableParent(self) -> None:
+        """
+        Disable the parent if the feature is enabled.
+        """
+        if self.parentWidget() and self._isParentDisabled:
+            self.parentWidget().setEnabled(False)
+
+    def _enableParent(self) -> None:
+        """
+        Enable the parent if thr feature is enabled.
+        """
+        if self.parentWidget() and self._isParentDisabled:
+            self.parentWidget().setEnabled(True)
+
     def _calcLineTrailPos(self, lineIdx: int, activeIdx: int,
                           lineCount: int) -> int:
         """
@@ -349,30 +363,23 @@ class WaitingSpinner(QWidget):
         """
         Start the spinner.
         """
-        self._centerInParent()
-        self._isSpinning = True
-        self.show()
-
-        if self.parentWidget and self._isParentDisabled:
-            self.parentWidget().setEnabled(False)
-
-        if not self._timer.isActive():
-            self._timer.start()
+        if not self._isSpinning:
+            self._centerInParent()
+            self._disableParent()
             self._counter = 0
+            self._timer.start()
+            self._isSpinning = True
+            self.show()
 
     def stop(self) -> None:
         """
         Stop the spinner.
         """
-        self._isSpinning = False
-        self.hide()
-
-        if self.parentWidget() and self._isParentDisabled:
-            self.parentWidget().setEnabled(True)
-
-        if self._timer.isActive():
+        if self._isSpinning:
+            self._enableParent()
             self._timer.stop()
-            self._counter = 0
+            self._isSpinning = False
+            self.hide()
 
     def paintEvent(self, event: QPaintEvent):
         self._centerInParent()
