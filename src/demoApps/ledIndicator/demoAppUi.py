@@ -3,7 +3,7 @@ from PySide2.QtWidgets import QButtonGroup, QGridLayout, QMainWindow, \
 
 
 class Ui_DemoApp(object):
-    def setupUi(self, DemoApp: QMainWindow, ledCnt: int):
+    def setupUi(self, DemoApp: QMainWindow, ledCnt: int) -> None:
         # Set up the DemoApp window
         DemoApp.setObjectName('DemoApp')
         DemoApp.setWindowTitle('LedIndicator Demo App')

@@ -9,7 +9,7 @@ from demoApps.ledIndicator.demoAppUi import Ui_DemoApp             # noqa: E402
 
 
 class DemoApp(QMainWindow, Ui_DemoApp):
-    def __init__(self):
+    def __init__(self) -> None:
         super(self.__class__, self).__init__()
 
         # LedIndicator creation. Here one of each color is created in a for
@@ -29,7 +29,7 @@ class DemoApp(QMainWindow, Ui_DemoApp):
         # Connecting button group clicked signal.
         self.buttonGroup.buttonClicked.connect(self.onPressButton)
 
-    def onPressButton(self, button: QPushButton):
+    def onPressButton(self, button: QPushButton) -> None:
         idx = self.buttonGroup.id(button)
         self.leds[idx].setChecked(not self.leds[idx].isChecked())
 
