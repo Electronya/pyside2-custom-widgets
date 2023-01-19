@@ -87,10 +87,10 @@ class Ui_DemoApp(object):
         self.lineWidthLbl = QLabel(self.settingsBox)
         self.lineWidthLbl.setText('Line Width:')
         self.settingsBoxLayout.addWidget(self.lineWidthLbl, 5, 0)
-        self.linWidthSb = QDoubleSpinBox(self.settingsBox)
-        self.linWidthSb.setValue(10)
-        self.linWidthSb.setRange(1, 20)
-        self.settingsBoxLayout.addWidget(self.linWidthSb, 5, 1)
+        self.lineWidthSb = QDoubleSpinBox(self.settingsBox)
+        self.lineWidthSb.setValue(2)
+        self.lineWidthSb.setRange(1, 20)
+        self.settingsBoxLayout.addWidget(self.lineWidthSb, 5, 1)
 
         # Set up inner radius
         self.innerRadiusLbl = QLabel(self.settingsBox)
@@ -104,11 +104,11 @@ class Ui_DemoApp(object):
         # Set up revolutions per second
         self.revsPerSecondLbl = QLabel(self.settingsBox)
         self.revsPerSecondLbl.setText('Revs/s:')
-        self.settingsBoxLayout.addWidget(self.revsPerSecondLbl, 6, 0)
+        self.settingsBoxLayout.addWidget(self.revsPerSecondLbl, 7, 0)
         self.revsPerSecondSb = QDoubleSpinBox(self.settingsBox)
         self.revsPerSecondSb.setValue(1)
         self.revsPerSecondSb.setRange(1, 10)
-        self.settingsBoxLayout.addWidget(self.revsPerSecondSb, 6, 1)
+        self.settingsBoxLayout.addWidget(self.revsPerSecondSb, 7, 1)
 
     def _setupButtons(self) -> None:
         # Set up start button
