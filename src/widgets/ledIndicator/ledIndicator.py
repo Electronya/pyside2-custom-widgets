@@ -3,7 +3,7 @@ from enum import Enum
 from PySide2.QtCore import QPointF, Qt
 from PySide2.QtGui import QBrush, QColor, QPainter, QPaintEvent, QPen, \
     QRadialGradient, QResizeEvent
-from PySide2.QtWidgets import QAbstractButton
+from PySide2.QtWidgets import QAbstractButton, QWidget
 
 
 class LedIndicatorColor(dict, Enum):
@@ -31,7 +31,7 @@ class LedIndicatorColor(dict, Enum):
 class LedIndicator(QAbstractButton):
     scaledSize = 1000.0
 
-    def __init__(self, parent=None,
+    def __init__(self, parent: QWidget = None,
                  color: LedIndicatorColor = LedIndicatorColor.GRN) -> None:
         """
         Constructor.
